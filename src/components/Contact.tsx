@@ -38,7 +38,7 @@ const Contact: React.FC = () => {
 
   const openWhatsApp = () => {
     const message = "Hi! I'm interested in your design services. Could we schedule a consultation?";
-    const phoneNumber = "919876543210"; // Replace with actual WhatsApp Business number
+    const phoneNumber = "916379835726"; // Replace with actual WhatsApp Business number
     window.open(`https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`, '_blank');
   };
 
@@ -85,7 +85,7 @@ const Contact: React.FC = () => {
                   <div>
                     <h4 className="font-semibold text-gray-900 mb-1">Phone</h4>
                     <p className="text-gray-600 text-sm">
-                      +91 98765 43210<br />
+                      +91 63798 35726<br />
                       +91 44 2851 2345
                     </p>
                   </div>
@@ -209,7 +209,7 @@ const Contact: React.FC = () => {
                       onChange={handleChange}
                       required
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
-                      placeholder="+91 98765 43210"
+                      placeholder="+91 63798 35726"
                     />
                   </div>
                   
