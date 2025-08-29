@@ -146,9 +146,9 @@ const About: React.FC = () => {
           <div className="grid md:grid-cols-3 gap-8">
             {[
               {
-                name: 'Arjun Krishnamurthy',
+                name: 'Kanish',
                 role: 'Principal Architect',
-                image: 'https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=400',
+                image: '/images/kanish.jpeg', // Updated path
                 description: 'B.Arch from SPA Delhi, 12+ years experience in sustainable architecture'
               },
               {

@@ -1,25 +1,8 @@
 import React, { useState } from 'react';
-import { Phone, Mail, MapPin, Clock, Send, MessageCircle, CheckCircle, AlertCircle, Loader } from 'lucide-react';
+import { Phone, Mail, MapPin, Clock, Send, MessageCircle, CheckCircle } from 'lucide-react';
 
-interface FormData {
-  name: string;
-  email: string;
-  phone: string;
-  projectType: string;
-  budget: string;
-  message: string;
-}
-
-interface SubmissionResponse {
-  success: boolean;
-  message: string;
-  submissionId?: string;
-  timestamp?: string;
-  errors?: Array<{ field: string; msg: string }>;
-}
-
-const Contact: React.FC = () => {
-  const [formData, setFormData] = useState<FormData>({
+const ContactFallback: React.FC = () => {
+  const [formData, setFormData] = useState({
     name: '',
     email: '',
     phone: '',
@@ -27,150 +10,43 @@ const Contact: React.FC = () => {
     budget: '',
     message: ''
   });
-  
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submissionStatus, setSubmissionStatus] = useState<{
-    type: 'success' | 'error' | null;
-    message: string;
-    submissionId?: string;
-  }>({ type: null, message: '' });
-  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
-
-  const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-    
-    // Clear field error when user starts typing
-    if (fieldErrors[name]) {
-      setFieldErrors(prev => ({
-        ...prev,
-        [name]: ''
-      }));
-    }
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
   };
 
-  const validateForm = (): boolean => {
-    const errors: Record<string, string> = {};
-    
-    if (!formData.name.trim()) {
-      errors.name = 'Name is required';
-    } else if (formData.name.trim().length < 2) {
-      errors.name = 'Name must be at least 2 characters';
-    }
-    
-    if (!formData.email.trim()) {
-      errors.email = 'Email is required';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      errors.email = 'Please enter a valid email address';
-    }
-    
-    if (!formData.phone.trim()) {
-      errors.phone = 'Phone number is required';
-    } else if (!/^[+]?[1-9][\d]{0,15}$/.test(formData.phone.replace(/\s/g, ''))) {
-      errors.phone = 'Please enter a valid phone number';
-    }
-    
-    if (!formData.projectType) {
-      errors.projectType = 'Please select a project type';
-    }
-    
-    if (!formData.message.trim()) {
-      errors.message = 'Project details are required';
-    } else if (formData.message.trim().length < 10) {
-      errors.message = 'Please provide more details (at least 10 characters)';
-    }
-    
-    setFieldErrors(errors);
-    return Object.keys(errors).length === 0;
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Clear previous status
-    setSubmissionStatus({ type: null, message: '' });
-    
-    // Validate form
-    if (!validateForm()) {
-      setSubmissionStatus({
-        type: 'error',
-        message: 'Please fix the errors above and try again.'
-      });
+    // Simple client-side validation
+    if (!formData.name || !formData.email || !formData.phone || !formData.projectType || !formData.message) {
+      alert('Please fill in all required fields.');
       return;
     }
+
+    // Simulate form submission
+    console.log('Form submitted:', formData);
+    setIsSubmitted(true);
+    setTimeout(() => setIsSubmitted(false), 5000);
     
-    setIsSubmitting(true);
-    
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/contact`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
-      
-      const data: SubmissionResponse = await response.json();
-      
-      if (data.success) {
-        setSubmissionStatus({
-          type: 'success',
-          message: data.message,
-          submissionId: data.submissionId
-        });
-        
-        // Reset form on success
-        setFormData({
-          name: '',
-          email: '',
-          phone: '',
-          projectType: '',
-          budget: '',
-          message: ''
-        });
-        
-        // Auto-hide success message after 10 seconds
-        setTimeout(() => {
-          setSubmissionStatus({ type: null, message: '' });
-        }, 10000);
-        
-      } else {
-        // Handle validation errors from server
-        if (data.errors && Array.isArray(data.errors)) {
-          const serverErrors: Record<string, string> = {};
-          data.errors.forEach(error => {
-            if (error.field) {
-              serverErrors[error.field] = error.msg;
-            }
-          });
-          setFieldErrors(serverErrors);
-        }
-        
-        setSubmissionStatus({
-          type: 'error',
-          message: data.message || 'Failed to submit your enquiry. Please try again.'
-        });
-      }
-      
-    } catch (error) {
-      console.error('Form submission error:', error);
-      setSubmissionStatus({
-        type: 'error',
-        message: 'Network error. Please check your connection and try again, or contact us directly.'
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
+    // Reset form
+    setFormData({
+      name: '',
+      email: '',
+      phone: '',
+      projectType: '',
+      budget: '',
+      message: ''
+    });
   };
 
   const openWhatsApp = () => {
     const message = "Hi! I'm interested in your design services. Could we schedule a consultation?";
-    const phoneNumber = "91 63798 35726"; // Replace with actual WhatsApp Business number
+    const phoneNumber = "91 63798 35726";
     window.open(`https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`, '_blank');
   };
 
@@ -286,25 +162,10 @@ const Contact: React.FC = () => {
             <div className="bg-white rounded-xl p-8 shadow-md">
               <h3 className="text-2xl font-bold text-gray-900 mb-6">Start Your Project</h3>
               
-              {/* Status Messages */}
-              {submissionStatus.type === 'success' && (
-                <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-start">
-                  <CheckCircle className="w-5 h-5 text-green-600 mr-3 mt-0.5 flex-shrink-0" />
-                  <div>
-                    <p className="text-green-700 font-medium">{submissionStatus.message}</p>
-                    {submissionStatus.submissionId && (
-                      <p className="text-green-600 text-sm mt-1">
-                        Reference ID: {submissionStatus.submissionId}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {submissionStatus.type === 'error' && (
-                <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start">
-                  <AlertCircle className="w-5 h-5 text-red-600 mr-3 mt-0.5 flex-shrink-0" />
-                  <p className="text-red-700">{submissionStatus.message}</p>
+              {isSubmitted && (
+                <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-center">
+                  <CheckCircle className="w-5 h-5 text-green-600 mr-3" />
+                  <p className="text-green-700">Thank you! We'll get back to you within 24 hours.</p>
                 </div>
               )}
 
@@ -320,17 +181,10 @@ const Contact: React.FC = () => {
                       name="name"
                       value={formData.name}
                       onChange={handleChange}
-                      disabled={isSubmitting}
-                      className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors ${
-                        fieldErrors.name 
-                          ? 'border-red-300 bg-red-50' 
-                          : 'border-gray-300'
-                      } ${isSubmitting ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                      required
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
                       placeholder="Your full name"
                     />
-                    {fieldErrors.name && (
-                      <p className="mt-1 text-sm text-red-600">{fieldErrors.name}</p>
-                    )}
                   </div>
                   
                   <div>
@@ -343,17 +197,10 @@ const Contact: React.FC = () => {
                       name="email"
                       value={formData.email}
                       onChange={handleChange}
-                      disabled={isSubmitting}
-                      className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors ${
-                        fieldErrors.email 
-                          ? 'border-red-300 bg-red-50' 
-                          : 'border-gray-300'
-                      } ${isSubmitting ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                      required
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
                       placeholder="your.email@example.com"
                     />
-                    {fieldErrors.email && (
-                      <p className="mt-1 text-sm text-red-600">{fieldErrors.email}</p>
-                    )}
                   </div>
                 </div>
 
@@ -368,17 +215,10 @@ const Contact: React.FC = () => {
                       name="phone"
                       value={formData.phone}
                       onChange={handleChange}
-                      disabled={isSubmitting}
-                      className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors ${
-                        fieldErrors.phone 
-                          ? 'border-red-300 bg-red-50' 
-                          : 'border-gray-300'
-                      } ${isSubmitting ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                      required
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
                       placeholder="+91 6379835726"
                     />
-                    {fieldErrors.phone && (
-                      <p className="mt-1 text-sm text-red-600">{fieldErrors.phone}</p>
-                    )}
                   </div>
                   
                   <div>
@@ -390,12 +230,8 @@ const Contact: React.FC = () => {
                       name="projectType"
                       value={formData.projectType}
                       onChange={handleChange}
-                      disabled={isSubmitting}
-                      className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors ${
-                        fieldErrors.projectType 
-                          ? 'border-red-300 bg-red-50' 
-                          : 'border-gray-300'
-                      } ${isSubmitting ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                      required
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
                     >
                       <option value="">Select project type</option>
                       <option value="residential">Residential Architecture</option>
@@ -404,9 +240,6 @@ const Contact: React.FC = () => {
                       <option value="renovation">Renovation</option>
                       <option value="consultation">Consultation Only</option>
                     </select>
-                    {fieldErrors.projectType && (
-                      <p className="mt-1 text-sm text-red-600">{fieldErrors.projectType}</p>
-                    )}
                   </div>
                 </div>
 
@@ -419,10 +252,7 @@ const Contact: React.FC = () => {
                     name="budget"
                     value={formData.budget}
                     onChange={handleChange}
-                    disabled={isSubmitting}
-                    className={`w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors ${
-                      isSubmitting ? 'bg-gray-100 cursor-not-allowed' : ''
-                    }`}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
                   >
                     <option value="">Select budget range</option>
                     <option value="5-15">₹5 - 15 Lakhs</option>
@@ -442,40 +272,19 @@ const Contact: React.FC = () => {
                     name="message"
                     value={formData.message}
                     onChange={handleChange}
-                    disabled={isSubmitting}
+                    required
                     rows={5}
-                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors resize-vertical ${
-                      fieldErrors.message 
-                        ? 'border-red-300 bg-red-50' 
-                        : 'border-gray-300'
-                    } ${isSubmitting ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors resize-vertical"
                     placeholder="Please describe your project, location, timeline, and any specific requirements..."
                   ></textarea>
-                  {fieldErrors.message && (
-                    <p className="mt-1 text-sm text-red-600">{fieldErrors.message}</p>
-                  )}
                 </div>
 
                 <button
                   type="submit"
-                  disabled={isSubmitting}
-                  className={`w-full flex items-center justify-center px-8 py-4 font-semibold rounded-lg transition-colors ${
-                    isSubmitting
-                      ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
-                      : 'bg-orange-600 text-white hover:bg-orange-700'
-                  }`}
+                  className="w-full flex items-center justify-center px-8 py-4 bg-orange-600 text-white font-semibold rounded-lg hover:bg-orange-700 transition-colors"
                 >
-                  {isSubmitting ? (
-                    <>
-                      <Loader className="w-5 h-5 mr-2 animate-spin" />
-                      Submitting...
-                    </>
-                  ) : (
-                    <>
-                      <Send className="w-5 h-5 mr-2" />
-                      Send Enquiry
-                    </>
-                  )}
+                  <Send className="w-5 h-5 mr-2" />
+                  Send Enquiry
                 </button>
 
                 <p className="text-sm text-gray-500 text-center">
@@ -490,4 +299,4 @@ const Contact: React.FC = () => {
   );
 };
 
-export default Contact;
+export default ContactFallback;

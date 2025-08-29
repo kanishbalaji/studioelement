@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Menu, X, Phone, Mail, MapPin, Heart, Share2, ChevronRight, Star, Users, Award, Clock, ArrowLeft } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import Header from './components/Header';
 import Hero from './components/Hero';
 import Portfolio from './components/Portfolio';
 import Services from './components/Services';
 import ServiceDetail from './components/ServiceDetail';
 import About from './components/About';
-import Contact from './components/Contact';
+import Contact from './components/ContactFallback';
+// import Contact from './components/Contact'; // Use this for Excel integration
 import Footer from './components/Footer';
 import FavoritesModal from './components/FavoritesModal';
 
